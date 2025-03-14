@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | TaskFlow</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Librairie pour les graphes -->
+</head>
+<body class="dashboard_body">
+
+<!-- Navbar -->
+<header class="dashboard-header">
+    <div class="logo">
+        <img src="assets/logo.png" alt="TaskFlow Logo">
+    </div>
+
+    <div class="header-text">
+        <h2>Bienvenue sur <b>TaskFlow</b></h2>
+        <p>Votre Plateforme de gestion de Tâches</p>
+    </div>
+
+    <div class="user-profile">
+        <div class="profile-container">
+            <img src="assets/default-avatar.png" id="userPhoto" alt="Profil">
+            <div class="user-info">
+                <span id="userName">Nom de l'utilisateur</span>
+                <span class="user-role">Super Admin</span>
+            </div>
+            <i class="arrow-down">▼</i>
+        </div>
+
+        <div class="dropdown-menu">
+            <a href="#" id="profile">Profil</a>
+            <a href="#" id="logout">Se déconnecter</a>
+        </div>
+    </div>
+</header>
+
+<!-- Dashboard Content -->
+<div id="dashboardContent" class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h3 id="totalTasks">0</h3>
+                <p>Tâches créées</p>
+            </div>
+            <canvas id="chartTotal"></canvas>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h3 id="tasksInProgress">0</h3>
+                <p>Tâches en cours</p>
+            </div>
+            <canvas id="chartInProgress"></canvas>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h3 id="tasksCompleted">0</h3>
+                <p>Tâches Terminées</p>
+            </div>
+            <canvas id="chartCompleted"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Bouton Voir Tâches -->
+<div class="text-center mt-4">
+    <button id="viewTasksBtn" class="btn btn-primary">Voir Tâches</button>
+</div>
+
+<!-- Section des Tâches (initialement cachée) -->
+<div id="tasksContent" class="container mt-5" style="display: none;">
+    <button id="backToDashboard" class="btn btn-secondary mb-3">← Retour</button>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <select class="form-select filter-status" id="filterStatus">
+            <option value="">Filtrer par statut</option>
+            <option value="Terminé">Terminé</option>
+            <option value="En Cours">En Cours</option>
+            <option value="Initié">Initié</option>
+        </select>
+        <div class="search-container">
+            <input type="text" class="form-control search-input" id="searchTask" placeholder="Rechercher...">
+        </div>
+        <button id="addTaskBtn" class="btn btn-primary new-task-btn">
+            <i class="fas fa-folder-plus"></i>+ Nouvelle Tâche
+        </button>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Titre</th>
+                <th>Description</th>
+                <th>Date création</th>
+                <th>Statut</th>
+                <th>Délai</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="taskList"></tbody>
+    </table>
+</div>
+
+<!-- Popup Ajout Tâche -->
+<div id="taskPopup" class="popup-overlay" style="display: none;">
+    <div class="popup">
+        <div class="popup-header">
+            <button class="close-popup" id="closePopup">✖</button>
+            <h3>Ajouter Tâche</h3>
+        </div>
+        <form id="taskForm">
+            <label for="taskTitle">Titre</label>
+            <input type="text" id="taskTitle" placeholder="Veuillez saisir le titre" required>
+
+            <label for="taskDescription">Description</label>
+            <textarea id="taskDescription" placeholder="Veuillez décrire la tâche" required></textarea>
+
+            <label for="taskStatus">Statut</label>
+            <select id="taskStatus" required>
+                <option value="Initié">Initié</option>
+                <option value="En Cours">En Cours</option>
+                <option value="Terminé">Terminé</option>
+            </select>
+
+            <label for="taskDeadline">Délai</label>
+            <input type="date" id="taskDeadline">
+
+            <button type="submit" class="btn btn-primary">Valider</button>
+        </form>
+    </div>
+</div>
+
+<!-- Menu d'actions pour une tâche -->
+<div id="taskActionsMenu" class="action-menu" style="display: none;">
+    <ul>
+        <li id="editTask"><i class="fas fa-edit"></i> Modifier</li>
+        <li id="deleteTask"><i class="fas fa-trash"></i> Supprimer</li>
+        <li id="markInProgress"><i class="fas fa-eye"></i> Marquer en cours</li>
+        <li id="markCompleted"><i class="fas fa-check-circle"></i> Marquer Terminée</li>
+    </ul>
+</div>
+
+<!-- Popup Modification Tâche -->
+<div id="editTaskPopup" class="popup-overlay" style="display: none;">
+    <div class="popup">
+        <div class="popup-header">
+            <button class="close-popup" id="closeEditPopup">✖</button>
+            <h3>Modifier Tâche</h3>
+        </div>
+        <form id="editTaskForm">
+            <input type="hidden" id="editTaskId">
+
+            <label for="editTaskTitle">Titre</label>
+            <input type="text" id="editTaskTitle" required>
+
+            <label for="editTaskDescription">Description</label>
+            <textarea id="editTaskDescription" required></textarea>
+
+            <label for="editTaskStatus">Statut</label>
+            <select id="editTaskStatus" required>
+                <option value="Initié">Initié</option>
+                <option value="En Cours">En Cours</option>
+                <option value="Terminé">Terminé</option>
+            </select>
+
+            <label for="editTaskDeadline">Délai</label>
+            <input type="date" id="editTaskDeadline">
+
+            <button type="submit" class="btn btn-primary">Mettre à jour</button>
+        </form>
+    </div>
+</div>
+
+<!-- ✅ Popup Confirmation Suppression Corrigé -->
+<div id="deleteTaskPopup" class="popup-overlay" style="display: none;">
+    <div class="popup">
+        <h3>Confirmation</h3>
+        <p>Voulez-vous vraiment supprimer cette tâche ?</p>
+        <div id="deleteButtonsContainer"> <!-- ✅ Ajout d'un ID pour CSS -->
+            <button id="confirmDeleteTask" class="btn btn-danger">Supprimer</button>
+            <button id="cancelDeleteTask" class="btn btn-secondary">Annuler</button>
+        </div>
+    </div>
+</div>
+
+
+<script src="script.js"></script>
+</body>
+</html>
