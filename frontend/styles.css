@@ -408,4 +408,37 @@ body {
     margin-top: 15px;
 }
 
+/* ✅ Conteneur de l'alerte */
+.alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+/* ✅ Style de l'alerte */
+.alert-message {
+    background-color: #28a745; /* Vert pour succès */
+    color: white;
+    padding: 12px 20px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* ✅ Style de l'alerte d'erreur */
+.alert-message.error {
+    background-color: #dc3545; /* Rouge pour erreur */
+}
+
 

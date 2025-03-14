@@ -186,6 +186,35 @@
     </div>
 </div>
 
+<!-- ✅ Popup Profil Utilisateur -->
+<div id="profilePopup" class="popup-overlay" style="display: none;">
+    <div class="popup">
+        <div class="popup-header">
+            <h3>Profil Utilisateur</h3>
+            <button class="close-popup" id="closeProfilePopup">✖</button>
+        </div>
+        <form id="profileForm">
+            <input type="hidden" id="profileId">
+
+            <label for="profileName">Nom Complet</label>
+            <input type="text" id="profileName" required>
+
+            <label for="profileEmail">Email</label>
+            <input type="email" id="profileEmail" disabled>
+
+            <label for="profilePassword">Nouveau Mot de passe (laisser vide pour ne pas changer)</label>
+            <input type="password" id="profilePassword">
+
+            <label for="profilePhoto">Photo de Profil</label>
+            <input type="file" id="profilePhoto">
+
+            <button type="submit" class="btn btn-primary">Mettre à jour</button>
+        </form>
+    </div>
+</div>
+
+<!-- ✅ Conteneur pour afficher les alertes -->
+<div id="alertContainer" class="alert-container"></div>
 
 <script src="script.js"></script>
 </body>

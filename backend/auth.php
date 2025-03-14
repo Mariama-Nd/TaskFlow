@@ -98,4 +98,43 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"]) && $_POST["
     }
     exit;
 }
+
+// ✅ Vérification si l'utilisateur est connecté
+if (!isset($_SESSION["idUser"])) {
+    echo json_encode(["error" => "Utilisateur non authentifié"]);
+    exit;
+}
+
+$idUser = $_SESSION["idUser"];
+$data = $_POST;
+
+// ✅ Mise à jour du profil utilisateur
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($data["action"]) && $data["action"] == "updateProfile") {
+    $NomComplet = trim($data["NomComplet"]);
+    $password = isset($data["pass"]) ? password_hash($data["pass"], PASSWORD_BCRYPT) : null;
+    $photo = "";
+
+    // Gestion du fichier image si fourni
+    if (!empty($_FILES["photo"]["name"])) {
+        $targetDir = "uploads/";
+        $photo = $targetDir . basename($_FILES["photo"]["name"]);
+        move_uploaded_file($_FILES["photo"]["tmp_name"], $photo);
+    }
+
+    // Mise à jour SQL
+    if ($password) {
+        $stmt = $pdo->prepare("UPDATE users SET NomComplet = ?, pass = ?, photo = IF(? != '', ?, photo) WHERE idUser = ?");
+        $stmt->execute([$NomComplet, $password, $photo, $photo, $idUser]);
+    } else {
+        $stmt = $pdo->prepare("UPDATE users SET NomComplet = ?, photo = IF(? != '', ?, photo) WHERE idUser = ?");
+        $stmt->execute([$NomComplet, $photo, $photo, $idUser]);
+    }
+
+    // Récupérer les nouvelles infos de l'utilisateur
+    $stmt = $pdo->prepare("SELECT idUser, NomComplet, email, photo FROM users WHERE idUser = ?");
+    $stmt->execute([$idUser]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    echo json_encode(["message" => "Profil mis à jour", "user" => $user]);
+}
 ?>

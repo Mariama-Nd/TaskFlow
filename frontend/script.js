@@ -355,6 +355,7 @@ function setupTaskActions() {
             }).then(response => response.json())
             .then(() => {
                 document.getElementById("editTaskPopup").style.display = "none";
+                alert("Tâche mise à jour avec succès !");
                 loadTasks();
             });
     
@@ -374,6 +375,7 @@ function setupTaskActions() {
             }).then(response => response.json())
             .then(() => {
                 document.getElementById("deleteTaskPopup").style.display = "none";
+                alert("Tâche supprimée avec succès !");
                 loadTasks();
             });
     
@@ -384,4 +386,79 @@ function setupTaskActions() {
             document.getElementById("deleteTaskPopup").style.display = "none";
         });
 }
+
+//profile
+document.addEventListener("DOMContentLoaded", function () {
+    setupProfilePopup();
+});
+
+function setupProfilePopup() {
+    const profileButton = document.getElementById("profile");
+    const profilePopup = document.getElementById("profilePopup");
+    const closeProfilePopup = document.getElementById("closeProfilePopup");
+    const profileForm = document.getElementById("profileForm");
+
+    if (profileButton) {
+        profileButton.addEventListener("click", function () {
+            loadUserProfile();
+            profilePopup.style.display = "flex";
+        });
+    }
+
+    if (closeProfilePopup) {
+        closeProfilePopup.addEventListener("click", function () {
+            profilePopup.style.display = "none";
+        });
+    }
+
+    profileForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        updateUserProfile();
+    });
+}
+
+// ✅ Charger les infos du profil dans le formulaire
+function loadUserProfile() {
+    let user = JSON.parse(localStorage.getItem("user"));
+
+    if (user) {
+        document.getElementById("profileId").value = user.idUser;
+        document.getElementById("profileName").value = user.NomComplet;
+        document.getElementById("profileEmail").value = user.email;
+    }
+}
+
+// ✅ Mise à jour du profil utilisateur
+function updateUserProfile() {
+    let formData = new FormData();
+    formData.append("action", "updateProfile");
+    formData.append("idUser", document.getElementById("profileId").value);
+    formData.append("NomComplet", document.getElementById("profileName").value);
+
+    let password = document.getElementById("profilePassword").value;
+    if (password) formData.append("pass", password); // Ajout du mot de passe seulement si rempli
+
+    let fileInput = document.getElementById("profilePhoto");
+    if (fileInput.files.length > 0) {
+        formData.append("photo", fileInput.files[0]); // Ajout de la photo si choisie
+    }
+
+    fetch("http://localhost/TaskFlow/backend/auth.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert("Profil mis à jour avec succès !");
+            localStorage.setItem("user", JSON.stringify(data.user)); // Mise à jour locale
+            document.getElementById("profilePopup").style.display = "none";
+            location.reload(); // Recharge la page pour voir les changements
+        } else {
+            alert("Erreur : " + data.error);
+        }
+    })
+    .catch(error => console.error("Erreur Fetch :", error));
+}
+
 
